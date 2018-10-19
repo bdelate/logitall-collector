@@ -1,4 +1,5 @@
 # stdlib imports
+import atexit
 import sqlite3
 from typing import Optional
 
@@ -10,7 +11,6 @@ class Manager:
         sql = 'PRAGMA foreign_keys = 1'  # enforce foreign key constraints
         self.cursor.execute(sql)
         self.create_db_tables()
-        self.conn.close()
 
     def create_db_tables(self) -> None:
         """Create database tables if they don't already exist"""
@@ -30,6 +30,11 @@ class Manager:
         '''
         self.cursor.execute(sql)
         self.conn.commit()
+
+    def close_db_connection(self) -> None:
+        """Close database connection"""
+        print('closing connection')
+        self.conn.close()
 
 
 def get_menu_input() -> Optional[int]:
@@ -52,7 +57,8 @@ def get_menu_input() -> Optional[int]:
 
 
 if __name__ == "__main__":
+    manager = Manager()
+    atexit.register(manager.close_db_connection)  # close db connection on exit
     option = get_menu_input()
-    if option is not None:
-        manager = Manager()
-
+    while option is not None:
+        option = get_menu_input()

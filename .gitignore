@@ -1,4 +1,6 @@
 .vscode/
 .mypy_cache/
 
+*.pyc
+
 src/collector.sqlite

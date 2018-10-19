@@ -1,8 +1,26 @@
+# stdlib imports
+import sqlite3
 from typing import Optional
 
 
+class Manager:
+    def __init__(self):
+        self.conn = sqlite3.connect('./src/collector.sqlite')
+        self.cursor = self.conn.cursor()
+        self.cursor.execute("SELECT * FROM sqlite_master;")
+        if len(self.cursor.fetchall()) > 0:
+            print('tables exist')
+        else:
+            self.create_db_tables()
+        self.conn.close()
+
+    def create_db_tables(self) -> None:
+        """Create initial database structure"""
+        print('creating tables')
+
+
 def get_menu_input() -> Optional[int]:
-    """Prompt the user with the available configuration options"""
+    """Main menu prompt with the available configuration options"""
     options = [
         '1: List directories being monitored',
         '2: Add directory to be monitored',
@@ -22,4 +40,6 @@ def get_menu_input() -> Optional[int]:
 
 if __name__ == "__main__":
     option = get_menu_input()
+    if option is not None:
+        manager = Manager()
 

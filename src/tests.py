@@ -32,7 +32,7 @@ class TestManager(unittest.TestCase):
     @mock.patch('configure.Manager.create_db_tables')
     def test_create_db_tables(self, mock_create_db_tables, mock_sql_connect):
         """Test that create_db_tables is called when Manager is instantiated"""
-        manager = configure.Manager()
+        _ = configure.Manager()
         assert mock_create_db_tables.called
 
 

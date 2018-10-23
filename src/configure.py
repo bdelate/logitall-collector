@@ -33,8 +33,19 @@ class Manager:
 
     def close_db_connection(self) -> None:
         """Close database connection"""
-        print('closing connection')
         self.conn.close()
+
+    def output_monitored_directories(self) -> None:
+        """Print all directories being monitored"""
+        sql = 'SELECT path FROM directory;'
+        self.cursor.execute(sql)
+        directories = self.cursor.fetchall()
+        if len(directories) > 0:
+            print('\nMonitored Directories:\n')
+            for directory in directories:
+                print(directory[0])
+        else:
+            print('\nThere are currently no directories being monitored')
 
 
 def get_menu_input() -> Optional[int]:
@@ -43,6 +54,7 @@ def get_menu_input() -> Optional[int]:
         '1: List directories being monitored',
         '2: Add directory to be monitored',
     ]
+    print()
     print(*options, sep='\n')
 
     try:
@@ -61,4 +73,6 @@ if __name__ == "__main__":
     atexit.register(manager.close_db_connection)  # close db connection on exit
     option = get_menu_input()
     while option is not None:
+        if option == 1:
+            manager.output_monitored_directories()
         option = get_menu_input()

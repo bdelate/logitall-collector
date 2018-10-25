@@ -1,4 +1,6 @@
 # stdlib imports
+import io
+import sys
 import unittest
 from unittest import mock
 
@@ -34,6 +36,37 @@ class TestManager(unittest.TestCase):
         """Test that create_db_tables is called when Manager is instantiated"""
         _ = configure.Manager()
         assert mock_create_db_tables.called
+
+    @mock.patch(
+        'configure.Manager.db_location', new_callable=unittest.mock.PropertyMock
+    )
+    def test_output_monitored_directories_when_none(self, mock_db_location):
+        """Test printing directories when none have been added"""
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        mock_db_location.return_value = ':memory:'
+        m = configure.Manager()
+        m.output_monitored_directories()
+        # sys.stdout = sys.__stdout__
+        self.assertEqual(
+            captured_output.getvalue(),
+            '\nThere are currently no directories being monitored.\n',
+        )
+
+    @mock.patch(
+        'configure.Manager.db_location', new_callable=unittest.mock.PropertyMock
+    )
+    def test_output_monitored_directories(self, mock_db_location):
+        """Test printing monitored directories"""
+        mock_db_location.return_value = ':memory:'
+        m = configure.Manager()
+        m.add_directory('/home')
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        m.output_monitored_directories()
+        self.assertEqual(
+            captured_output.getvalue(), '\nMonitored Directories:\n\n/home\n'
+        )
 
 
 if __name__ == "__main__":

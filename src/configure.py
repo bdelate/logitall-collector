@@ -4,13 +4,13 @@ import pathlib
 import sqlite3
 from typing import Optional
 
+# project imports
+import settings
+
 
 class Manager:
-
-    db_location = './src/collector.sqlite'
-
     def __init__(self):
-        self.conn = sqlite3.connect(self.db_location)
+        self.conn = sqlite3.connect(settings.DB_LOCATION)
         self.cursor = self.conn.cursor()
         sql = 'PRAGMA foreign_keys = 1'  # enforce foreign key constraints
         self.cursor.execute(sql)

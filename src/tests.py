@@ -7,6 +7,7 @@ from unittest import mock
 # project imports
 import configure
 from configure import get_menu_input
+import settings
 
 
 class TestMenuInput(unittest.TestCase):
@@ -30,6 +31,9 @@ class TestMenuInput(unittest.TestCase):
 
 
 class TestManager(unittest.TestCase):
+    def setUp(self):
+        settings.DB_LOCATION = ':memory:'
+
     @mock.patch('sqlite3.connect')
     @mock.patch('configure.Manager.create_db_tables')
     def test_create_db_tables(self, mock_create_db_tables, mock_sql_connect):
@@ -37,28 +41,21 @@ class TestManager(unittest.TestCase):
         _ = configure.Manager()
         assert mock_create_db_tables.called
 
-    @mock.patch(
-        'configure.Manager.db_location', new_callable=unittest.mock.PropertyMock
-    )
-    def test_output_monitored_directories_when_none(self, mock_db_location):
+    def test_output_monitored_directories_when_none(self):
         """Test printing directories when none have been added"""
         captured_output = io.StringIO()
         sys.stdout = captured_output
-        mock_db_location.return_value = ':memory:'
+        # settings.DB_LOCATION = ':memory:'
         m = configure.Manager()
         m.output_monitored_directories()
-        # sys.stdout = sys.__stdout__
         self.assertEqual(
             captured_output.getvalue(),
             '\nThere are currently no directories being monitored.\n',
         )
 
-    @mock.patch(
-        'configure.Manager.db_location', new_callable=unittest.mock.PropertyMock
-    )
-    def test_output_monitored_directories(self, mock_db_location):
+    def test_output_monitored_directories(self):
         """Test printing monitored directories"""
-        mock_db_location.return_value = ':memory:'
+        # settings.DB_LOCATION = ':memory:'
         m = configure.Manager()
         m.add_directory('/home')
         captured_output = io.StringIO()
@@ -68,34 +65,22 @@ class TestManager(unittest.TestCase):
             captured_output.getvalue(), '\nMonitored Directories:\n\n/home\n'
         )
 
-    @mock.patch(
-        'configure.Manager.db_location', new_callable=unittest.mock.PropertyMock
-    )
-    def test_adding_directory(self, mock_db_location):
+    def test_adding_directory(self):
         """Test that a directory can be added"""
-        mock_db_location.return_value = ':memory:'
         m = configure.Manager()
         m.add_directory('/home')
         m.cursor.execute('select * from directory;')
         self.assertEqual(len(m.cursor.fetchall()), 1)
 
-    @mock.patch(
-        'configure.Manager.db_location', new_callable=unittest.mock.PropertyMock
-    )
-    def test_adding_invalid_directory(self, mock_db_location):
+    def test_adding_invalid_directory(self):
         """Test that an invalid directory cannot be added"""
-        mock_db_location.return_value = ':memory:'
         m = configure.Manager()
         m.add_directory('/fake/directory/does/not/exist')
         m.cursor.execute('select * from directory;')
         self.assertEqual(len(m.cursor.fetchall()), 0)
 
-    @mock.patch(
-        'configure.Manager.db_location', new_callable=unittest.mock.PropertyMock
-    )
-    def test_adding_duplicate_directory(self, mock_db_location):
+    def test_adding_duplicate_directory(self):
         """Test that a duplicate directory cannot be added"""
-        mock_db_location.return_value = ':memory:'
         m = configure.Manager()
         m.add_directory('/home')
         m.cursor.execute('select * from directory;')

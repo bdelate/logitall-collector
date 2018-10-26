@@ -68,6 +68,42 @@ class TestManager(unittest.TestCase):
             captured_output.getvalue(), '\nMonitored Directories:\n\n/home\n'
         )
 
+    @mock.patch(
+        'configure.Manager.db_location', new_callable=unittest.mock.PropertyMock
+    )
+    def test_adding_directory(self, mock_db_location):
+        """Test that a directory can be added"""
+        mock_db_location.return_value = ':memory:'
+        m = configure.Manager()
+        m.add_directory('/home')
+        m.cursor.execute('select * from directory;')
+        self.assertEqual(len(m.cursor.fetchall()), 1)
+
+    @mock.patch(
+        'configure.Manager.db_location', new_callable=unittest.mock.PropertyMock
+    )
+    def test_adding_invalid_directory(self, mock_db_location):
+        """Test that an invalid directory cannot be added"""
+        mock_db_location.return_value = ':memory:'
+        m = configure.Manager()
+        m.add_directory('/fake/directory/does/not/exist')
+        m.cursor.execute('select * from directory;')
+        self.assertEqual(len(m.cursor.fetchall()), 0)
+
+    @mock.patch(
+        'configure.Manager.db_location', new_callable=unittest.mock.PropertyMock
+    )
+    def test_adding_duplicate_directory(self, mock_db_location):
+        """Test that a duplicate directory cannot be added"""
+        mock_db_location.return_value = ':memory:'
+        m = configure.Manager()
+        m.add_directory('/home')
+        m.cursor.execute('select * from directory;')
+        self.assertEqual(len(m.cursor.fetchall()), 1)
+        m.add_directory('/home')
+        m.cursor.execute('select * from directory;')
+        self.assertEqual(len(m.cursor.fetchall()), 1)
+
 
 if __name__ == "__main__":
     unittest.main()

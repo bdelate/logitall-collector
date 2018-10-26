@@ -1,12 +1,16 @@
 # stdlib imports
 import atexit
+import pathlib
 import sqlite3
 from typing import Optional
 
 
 class Manager:
+
+    db_location = './src/collector.sqlite'
+
     def __init__(self):
-        self.conn = sqlite3.connect('./src/collector.sqlite')
+        self.conn = sqlite3.connect(self.db_location)
         self.cursor = self.conn.cursor()
         sql = 'PRAGMA foreign_keys = 1'  # enforce foreign key constraints
         self.cursor.execute(sql)
@@ -45,7 +49,24 @@ class Manager:
             for directory in directories:
                 print(directory[0])
         else:
-            print('\nThere are currently no directories being monitored')
+            print('\nThere are currently no directories being monitored.')
+
+    def add_directory(self, directory: str) -> None:
+        """Add new directory to be monitored"""
+        path = pathlib.Path(directory)
+        if path.is_dir():
+            path = path.resolve()
+            sql = f'SELECT COUNT(*) FROM directory where path = "{path}";'
+            self.cursor.execute(sql)
+            if self.cursor.fetchone()[0] == 0:
+                sql = f'INSERT INTO directory (path) VALUES ("{path}")'
+                self.cursor.execute(sql)
+                self.conn.commit()
+                print('\n Directory added.')
+            else:
+                print('\nDirectory is already being monitored.')
+        else:
+            print('\nInvalid directory.')
 
 
 def get_menu_input() -> Optional[int]:
@@ -75,4 +96,7 @@ if __name__ == "__main__":
     while option is not None:
         if option == 1:
             manager.output_monitored_directories()
+        elif option == 2:
+            directory = input('\nEnter full path (eg: /var/log/nginx)\n>')
+            manager.add_directory(directory=directory)
         option = get_menu_input()

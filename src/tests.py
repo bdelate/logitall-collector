@@ -34,18 +34,18 @@ class TestManager(unittest.TestCase):
     def setUp(self):
         settings.DB_LOCATION = ':memory:'
 
-    @mock.patch('sqlite3.connect')
-    @mock.patch('configure.Manager.create_db_tables')
-    def test_create_db_tables(self, mock_create_db_tables, mock_sql_connect):
-        """Test that create_db_tables is called when Manager is instantiated"""
-        _ = configure.Manager()
-        assert mock_create_db_tables.called
+    def test_create_db_tables(self):
+        """Test that the database is created when Manager is instantiated"""
+        m = configure.Manager()
+        sql = 'SELECT name FROM sqlite_master WHERE type="table" order by name;'
+        m.cursor.execute(sql)
+        tables = [table[0] for table in m.cursor.fetchall()]
+        self.assertEqual(tables, ['directory', 'file'])
 
     def test_output_monitored_directories_when_none(self):
         """Test printing directories when none have been added"""
         captured_output = io.StringIO()
         sys.stdout = captured_output
-        # settings.DB_LOCATION = ':memory:'
         m = configure.Manager()
         m.output_monitored_directories()
         self.assertEqual(

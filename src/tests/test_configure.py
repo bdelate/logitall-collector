@@ -5,9 +5,9 @@ import unittest
 from unittest import mock
 
 # project imports
-import configure
-from configure import get_menu_input
-import settings
+from src import configure
+from src.configure import get_menu_input
+from src import settings
 
 
 class TestMenuInput(unittest.TestCase):
@@ -90,5 +90,5 @@ class TestManager(unittest.TestCase):
         self.assertEqual(len(m.cursor.fetchall()), 1)
 
 
-if __name__ == "__main__":
-    unittest.main()
+# if __name__ == "__main__":
+#     unittest.main()

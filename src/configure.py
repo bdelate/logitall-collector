@@ -5,7 +5,7 @@ import sqlite3
 from typing import Optional
 
 # project imports
-import settings
+from src import settings
 
 
 class Manager:

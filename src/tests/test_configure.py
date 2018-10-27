@@ -5,9 +5,9 @@ import unittest
 from unittest import mock
 
 # project imports
-from src import configure
-from src.configure import get_menu_input
-from src import settings
+import configure
+from configure import get_menu_input
+import settings
 
 
 class TestMenuInput(unittest.TestCase):
@@ -88,7 +88,3 @@ class TestManager(unittest.TestCase):
         m.add_directory('/home')
         m.cursor.execute('select * from directory;')
         self.assertEqual(len(m.cursor.fetchall()), 1)
-
-
-# if __name__ == "__main__":
-#     unittest.main()

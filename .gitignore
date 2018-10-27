@@ -3,4 +3,5 @@
 
 *.pyc
 
-src/collector.sqlite
+collector.sqlite
+logitall.log

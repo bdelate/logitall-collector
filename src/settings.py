@@ -1,1 +1,1 @@
-DB_LOCATION = './collector.sqlite'
+DB_LOCATION = 'sqlite:///collector.sqlite'

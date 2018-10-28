@@ -4,6 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+sqlalchemy = "==1.2.12"
 
 [dev-packages]
 mypy = "*"

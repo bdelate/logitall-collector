@@ -5,12 +5,12 @@ import unittest
 from unittest import mock
 
 # project imports
-import configure
-from configure import get_menu_input
+from configure import get_menu_input, print_monitored_directories, add_directory
+import model
 import settings
 
 
-class TestMenuInput(unittest.TestCase):
+class MenuInputTestCase(unittest.TestCase):
     def test_menu_string_input(self):
         """Test string input to menu returns None"""
         with unittest.mock.patch('builtins.input', return_value='test'):
@@ -30,61 +30,59 @@ class TestMenuInput(unittest.TestCase):
         self.assertEqual(1, option)
 
 
-class TestManager(unittest.TestCase):
+class DirectoryManagementTestCase(unittest.TestCase):
     def setUp(self):
-        settings.DB_LOCATION = ':memory:'
+        settings.DB_LOCATION = 'sqlite:///:memory:'
 
-    def test_create_db_tables(self):
-        """Test that the database is created when Manager is instantiated"""
-        m = configure.Manager()
-        sql = 'SELECT name FROM sqlite_master WHERE type="table" order by name;'
-        m.cursor.execute(sql)
-        tables = [table[0] for table in m.cursor.fetchall()]
-        self.assertEqual(tables, ['directory', 'file'])
+    def test_adding_directory(self):
+        """Test that a directory can be added"""
+        session = model.get_db_session()
+        add_directory(directory='/home', session=session)
+        directory = session.query(model.Directory).first()
+        self.assertEqual(directory.path, '/home')
+        session.close()
 
-    def test_output_monitored_directories_when_none(self):
+    def test_adding_invalid_directory(self):
+        """Test that an invalid directory cannot be added"""
+        session = model.get_db_session()
+        add_directory(directory='/directory/does/not/exist', session=session)
+        dir_count = session.query(model.Directory).count()
+        self.assertEqual(dir_count, 0)
+        session.close()
+
+    def test_adding_duplicate_directory(self):
+        """Test that a duplicate directory cannot be added"""
+        session = model.get_db_session()
+        add_directory(directory='/home', session=session)
+        dir_count_1 = session.query(model.Directory).count()
+        self.assertEqual(dir_count_1, 1)
+        add_directory(directory='/home', session=session)
+        dir_count_2 = session.query(model.Directory).count()
+        self.assertEqual(dir_count_2, 1)
+        session.close()
+
+    def test_print_monitored_directories_when_none(self):
         """Test printing directories when none have been added"""
         captured_output = io.StringIO()
-        sys.stdout = captured_output
-        m = configure.Manager()
-        m.output_monitored_directories()
+        sys.stdout = captured_output  # redirect stdout
+        session = model.get_db_session()
+        print_monitored_directories(session)
         self.assertEqual(
             captured_output.getvalue(),
             '\nThere are currently no directories being monitored.\n',
         )
+        session.close()
+        sys.stdout = sys.__stdout__  # stop redirecting stdout
 
-    def test_output_monitored_directories(self):
+    def test_print_monitored_directories(self):
         """Test printing monitored directories"""
-        # settings.DB_LOCATION = ':memory:'
-        m = configure.Manager()
-        m.add_directory('/home')
+        session = model.get_db_session()
+        add_directory(directory='/home', session=session)
         captured_output = io.StringIO()
-        sys.stdout = captured_output
-        m.output_monitored_directories()
+        sys.stdout = captured_output  # redirect stdout
+        print_monitored_directories(session=session)
         self.assertEqual(
             captured_output.getvalue(), '\nMonitored Directories:\n\n/home\n'
         )
-
-    def test_adding_directory(self):
-        """Test that a directory can be added"""
-        m = configure.Manager()
-        m.add_directory('/home')
-        m.cursor.execute('select * from directory;')
-        self.assertEqual(len(m.cursor.fetchall()), 1)
-
-    def test_adding_invalid_directory(self):
-        """Test that an invalid directory cannot be added"""
-        m = configure.Manager()
-        m.add_directory('/fake/directory/does/not/exist')
-        m.cursor.execute('select * from directory;')
-        self.assertEqual(len(m.cursor.fetchall()), 0)
-
-    def test_adding_duplicate_directory(self):
-        """Test that a duplicate directory cannot be added"""
-        m = configure.Manager()
-        m.add_directory('/home')
-        m.cursor.execute('select * from directory;')
-        self.assertEqual(len(m.cursor.fetchall()), 1)
-        m.add_directory('/home')
-        m.cursor.execute('select * from directory;')
-        self.assertEqual(len(m.cursor.fetchall()), 1)
+        session.close()
+        sys.stdout = sys.__stdout__  # stop redirecting stdout

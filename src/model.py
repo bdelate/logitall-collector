@@ -3,11 +3,9 @@ from typing import Any
 
 # 3rd party imports
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy import create_engine
+from sqlalchemy import Column, Integer, String, ForeignKey, event, create_engine
 from sqlalchemy.orm.session import Session
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import event
 from sqlalchemy.engine import Engine
 
 # project imports

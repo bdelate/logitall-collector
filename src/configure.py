@@ -36,12 +36,12 @@ def add_directory(directory: str, session: Session) -> None:
     """Add new directory to be monitored"""
     path = pathlib.Path(directory)
     if path.is_dir():
-        path = path.resolve()
+        path_str = str(path.resolve()).lower()
         directory_exists = (
-            session.query(model.Directory).filter_by(path=str(path)).count()
+            session.query(model.Directory).filter_by(path=path_str).count()
         )
         if directory_exists == 0:
-            new_directory = model.Directory(path=str(path))
+            new_directory = model.Directory(path=path_str)
             session.add(new_directory)
             session.commit()
             print('\nDirectory Added.')

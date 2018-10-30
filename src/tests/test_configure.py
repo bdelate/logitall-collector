@@ -50,13 +50,13 @@ class DirectoryManagementTestCase(unittest.TestCase):
         self.assertEqual(dir_count, 0)
         session.close()
 
-    def test_adding_duplicate_directory(self):
-        """Test that a duplicate directory cannot be added"""
+    def test_adding_duplicate_directory_case_sensitivity(self):
+        """Test that differing case duplicate directories cannot be added"""
         session = model.get_db_session()
         add_directory(directory='/home', session=session)
         dir_count_1 = session.query(model.Directory).count()
         self.assertEqual(dir_count_1, 1)
-        add_directory(directory='/home', session=session)
+        add_directory(directory='/HOME', session=session)
         dir_count_2 = session.query(model.Directory).count()
         self.assertEqual(dir_count_2, 1)
         session.close()

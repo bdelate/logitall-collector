@@ -10,6 +10,7 @@ sqlalchemy = "==1.2.12"
 mypy = "*"
 pylint = "*"
 black = "*"
+pyfakefs = "==3.5"
 
 [requires]
 python_version = "3.7"
